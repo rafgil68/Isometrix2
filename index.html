@@ -3,20 +3,41 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 	<link rel="manifest" href="manifest.json">
     <title>Isometrix2 - Entrenamiento</title>
     <style>
-        body { font-family: sans-serif; background-color: #121212; color: white; padding: 20px; text-align: center; }
+		html {
+			font-size: 18px; /* Esto hará que todos los 'rem' sean más grandes */
+		}
+        body { font-family: sans-serif;
+            background-color: #121212;
+            color: white;
+            padding: 10px; /* Reducimos el padding de los lados */
+            text-align: center;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column; }
         .selector-dia { display: flex; justify-content: center; gap: 10px; margin-bottom: 20px; }
         .btn-dia { padding: 12px 20px; border-radius: 12px; border: none; cursor: pointer; color: white; font-weight: bold; }
         #btn-dia1 { background-color: #3498db; }
         #btn-dia2 { background-color: #e67e22; }
         #btn-dia3 { background-color: #27ae60; }
         
-        .ejercicio-card { background: #1e1e1e; padding: 20px; border-radius: 15px; margin: 10px auto; max-width: 400px; }
+        .ejercicio-card {
+            background: #1e1e1e;
+            padding: 20px;
+            border-radius: 15px;
+            margin: 10px auto;
+            width: 100%;       /* Cambiado de max-width a width: 100% */
+            max-width: 600px;  /* Un poco más ancho para pantallas grandes */
+        }
         .info-peso { color: #3498db; font-weight: bold; font-size: 1.2rem; }
-        .cronometro { font-size: 4rem; font-weight: 900; margin: 20px 0; }
+        .cronometro {
+            font-size: 3.5rem; /* Ajusta este tamaño si sigue viéndose raro */
+            font-weight: 900;
+            margin: 15px 0;
+        }
         
 		.btn-principal { 
 			display: block;          /* Convierte el botón en bloque para ocupar espacio */
@@ -123,7 +144,7 @@
     <div class="ejercicio-card">
         
         <div class="contenedor-img-ej">
-            <img id="ui-imagen-ejercicio" src="Isometrix.jpg" style="display:block;">
+            <img id="ui-imagen-ejercicio" src="Isometrix.png" style="display:block;">
         </div>
 		
 		<div id="ui-timer" class="cronometro" style="display: none;">00:00</div>
@@ -186,7 +207,7 @@
 		],
             dia2:[
 			{ nombre: "movilidad espalda", tipo: "iso", tiempo: 45, img: "mov_espalda.png" },
-			{ nombre: "Buenos días", tipo: "iso", tiempo: 45, img: "Buenos%20d%C3%ADas.png" },
+			{ nombre: "Buenos días", tipo: "iso", tiempo: 45, img: "Buenos_dias.png" },
 			{ nombre: "Bird dog", tipo: "iso", tiempo: 45, img: "bird_dog.png" },
 			{ nombre: "Plancha Lateral (Der)", tipo: "iso", tiempo: 45, img: "plancha_lat.jpg" },
 			{ nombre: "Plancha Lateral (izda)", tipo: "iso", tiempo: 45, img: "plancha_lat.jpg" },
