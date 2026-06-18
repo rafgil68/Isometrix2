@@ -139,12 +139,13 @@
             <button id="btn-dia2" class="btn-dia" onclick="cargarDia('dia2')">Día 2</button>
             <button id="btn-dia3" class="btn-dia" onclick="cargarDia('dia3')">Día 3</button>
         </div>
+		<img id="ui-logo" src="Isometrix.png" style="width:200px; margin-top:15px;">
     </header>
 
     <div class="ejercicio-card">
         
         <div class="contenedor-img-ej">
-            <img id="ui-imagen-ejercicio" src="Isometrix.png">
+            <img id="ui-imagen-ejercicio" src="">
         </div>
 		
 		<div id="ui-timer" class="cronometro" style="display: none;">00:00</div>
@@ -258,16 +259,16 @@
         let ejercicioIdx = 0;
 
         function cargarDia(dia) {
-            diaActual = dia;
-            ejercicioIdx = 0;
-            
-            // Ocultar selectores y mostrar vista de rutina
-            document.getElementById('contenedor-selector').style.display = 'none';
-            document.getElementById('ui-imagen-ejercicio').style.display = 'block';
-            document.getElementById('btn-control').style.display = 'block';
-            
-            renderizarEjercicio();
-        }
+			diaActual = dia;
+			ejercicioIdx = 0;
+			
+			document.getElementById('contenedor-selector').style.display = 'none';
+			document.getElementById('ui-logo').style.display = 'none';  // ← añadir esto
+			document.getElementById('ui-imagen-ejercicio').style.display = 'block';
+			document.getElementById('btn-control').style.display = 'block';
+			
+			renderizarEjercicio();
+		}
 
 
 		 function renderizarEjercicio() {
