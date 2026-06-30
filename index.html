@@ -52,6 +52,30 @@
 			font-weight: bold; 
 			cursor: pointer; 
 		}
+
+		/* Botones de navegación (Anterior / Siguiente) */
+		.fila-navegacion {
+			display: none;
+			justify-content: space-between;
+			gap: 10px;
+			margin: 15px auto 0;
+			max-width: 300px;
+		}
+		.btn-nav {
+			flex: 1;
+			padding: 12px 10px;
+			border-radius: 50px;
+			border: none;
+			background-color: #333;
+			color: white;
+			font-weight: bold;
+			cursor: pointer;
+			font-size: 0.95rem;
+		}
+		.btn-nav:disabled {
+			opacity: 0.35;
+			cursor: not-allowed;
+		}
 		
 		/* Contenedor fijo para todas las imágenes */
         .contenedor-img-ej { 
@@ -152,6 +176,11 @@
         <p id="ui-info" style="font-weight: bold;"></p>
         
         <button id="btn-control" class="btn-principal" onclick="manejarAccion()" style="display: none;">EMPEZAR</button>
+
+        <div id="fila-navegacion" class="fila-navegacion">
+            <button id="btn-anterior" class="btn-nav" onclick="irAnterior()">⬅ Anterior</button>
+            <button id="btn-siguiente" class="btn-nav" onclick="irSiguiente()">Siguiente ➡</button>
+        </div>
     </div>
     
 
@@ -172,6 +201,40 @@
 				.then(reg => console.log('Service Worker registrado', reg))
 				.catch(err => console.error('Error en Service Worker', err));
 		}
+
+		// --- Wake Lock: mantiene la pantalla encendida mientras se usa la app ---
+		let wakeLock = null;
+
+		async function solicitarWakeLock() {
+			if (!('wakeLock' in navigator)) return; // No soportado en este navegador
+			try {
+				wakeLock = await navigator.wakeLock.request('screen');
+				wakeLock.addEventListener('release', () => {
+					console.log('Wake Lock liberado');
+				});
+				console.log('Wake Lock activado');
+			} catch (err) {
+				console.error('No se pudo activar Wake Lock:', err);
+			}
+		}
+
+		// El Wake Lock se libera automáticamente si la pestaña/app pasa a segundo plano.
+		// Cuando vuelve a estar visible, lo volvemos a solicitar.
+		document.addEventListener('visibilitychange', () => {
+			if (wakeLock === null && document.visibilityState === 'visible') {
+				solicitarWakeLock();
+			}
+		});
+
+		// Lo solicitamos en cuanto carga la app
+		solicitarWakeLock();
+
+		// Si se solicita en interacción con el primer toque/click (por si el navegador
+		// requiere un gesto del usuario antes de conceder el Wake Lock)
+		document.addEventListener('click', () => {
+			if (wakeLock === null) solicitarWakeLock();
+		}, { once: true });
+
 		// Si la versión guardada no coincide, borramos la caché de rutinas
 		const VERSION_RUTINAS = '1';
 		if (localStorage.getItem('versionRutinas') !== VERSION_RUTINAS) {
@@ -257,6 +320,7 @@
 
         let diaActual = null;
         let ejercicioIdx = 0;
+		let intervalActual = null;
 
         function cargarDia(dia) {
 			diaActual = dia;
@@ -266,12 +330,19 @@
 			document.getElementById('ui-logo').style.display = 'none';  // ← añadir esto
 			document.getElementById('ui-imagen-ejercicio').style.display = 'block';
 			document.getElementById('btn-control').style.display = 'block';
+			document.getElementById('fila-navegacion').style.display = 'flex';
 			
 			renderizarEjercicio();
 		}
 
 
 		 function renderizarEjercicio() {
+			// Si había un cronómetro corriendo (por ej. al navegar manualmente), lo paramos
+			if (intervalActual) {
+				clearInterval(intervalActual);
+				intervalActual = null;
+			}
+
 			const ej = rutinas[diaActual][ejercicioIdx];
 					
 			document.getElementById('ui-nombre').innerText = ej.nombre;
@@ -291,6 +362,22 @@
 				document.getElementById('btn-control').style.display = 'block'; // Aseguramos que se vea
 				document.getElementById('btn-control').innerText = "EMPEZAR";
 			}
+
+			// Gestión de botones de navegación
+			document.getElementById('fila-navegacion').style.display = 'flex';
+			document.getElementById('btn-anterior').disabled = (ejercicioIdx === 0);
+			document.getElementById('btn-siguiente').innerText = (ejercicioIdx === rutinas[diaActual].length - 1) ? 'Finalizar ➡' : 'Siguiente ➡';
+		}
+
+		function irAnterior() {
+			if (ejercicioIdx > 0) {
+				ejercicioIdx--;
+				renderizarEjercicio();
+			}
+		}
+
+		function irSiguiente() {
+			avanzar();
 		}
 		
 		
@@ -363,7 +450,7 @@
 				let t = ej.tiempo;
 				document.getElementById('ui-timer').innerText = t;
 				
-				const interval = setInterval(() => {
+				intervalActual = setInterval(() => {
 					t--;
 					document.getElementById('ui-timer').innerText = t;
 					
@@ -373,7 +460,8 @@
 					}
 
 					if (t <= 0) {
-						clearInterval(interval);
+						clearInterval(intervalActual);
+						intervalActual = null;
 						avanzar();
 					}
 				}, 1000);
@@ -402,6 +490,12 @@
 		}
 		
         function avanzar() {
+			// Si el usuario pulsa "Siguiente" mientras corre el cronómetro, lo cancelamos
+			if (intervalActual) {
+				clearInterval(intervalActual);
+				intervalActual = null;
+			}
+
 			ejercicioIdx++;
 			if (ejercicioIdx < rutinas[diaActual].length) {
 				renderizarEjercicio();
@@ -414,6 +508,7 @@
 				document.getElementById('btn-control').innerText = "VOLVER AL INICIO";
 				document.getElementById('btn-control').style.display = 'block';
 				document.getElementById('btn-control').onclick = () => location.reload();
+				document.getElementById('fila-navegacion').style.display = 'none';
 			}
 		}
     </script>
